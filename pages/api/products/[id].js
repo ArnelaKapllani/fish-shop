@@ -1,13 +1,14 @@
-import { products } from "../../../lib/products";
+import dbConnect from "../../../db/connect";
+import Product from "../../../db/models/product";
 
-export default function handler(request, response) {
+export default async function handler(request, response) {
+  await dbConnect();
   const { id } = request.query;
 
-  const product = products.find((product) => product.id === id);
-
-  if (!product) {
-    return response.status(404).json({ status: "Not Found" });
+  if (request.method === "GET") {
+    const product = await Product.findById(id).populate("reviews");
+    return response.status(200).json(product);
+  } else {
+    return response.status(404).json({ message: "Methode not Allowed" });
   }
-
-  response.status(200).json(product);
 }
